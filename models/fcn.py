@@ -34,3 +34,14 @@ class FCN(object):
 
     def restore(self, session, checkpoint_path):
         self.saver.restore(session, checkpoint_path)
+
+
+class fcnRegressor(object):
+    def __init__(self, sess: tf.Session, is_train: bool, config: dict):
+        # get train parameters
+        self._sess = sess
+        _is_train = is_train
+        _batch_size = config['batch_size']
+        _img_height, _img_width = config["image_size"]
+        self.x = tf.placeholder(dtype=tf.float32, shape=[_batch_size, _img_height, _img_width, 1])
+        self.y = tf.placeholder(dtype=tf.float32, shape=[_batch_size, _img_height, _img_width, 1])
