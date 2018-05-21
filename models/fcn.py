@@ -1,6 +1,8 @@
 import tensorflow as tf
-from models.utils import conv2d
-from models.utils import conv2d_transpose
+from models.utils import conv2d, conv2d_transpose
+from models.WarpST import WarpST
+from models.utils import ncc, save_image_with_scale
+import os
 
 class FCN(object):
     def __init__(self, name: str, is_train: bool):
@@ -10,19 +12,19 @@ class FCN(object):
 
     def __call__(self, x):
         with tf.variable_scope(self._name, reuse=self._reuse):
-            x_1 = conv2d(x, 'Conv1', 32, 3, 2, 'SAME', True, tf.nn.relu,self._is_train )
+            x_1 = conv2d(x, 'Conv1', 32, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
             x_2 = tf.nn.avg_pool(x_1, [1, 3, 3, 1], [1, 2, 2, 1], 'SAME', name='pooling1')
             x_3 = conv2d(x_2, 'Conv2', 64, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
             x_4 = tf.nn.avg_pool(x_3, [1, 3, 3, 1], [1, 2, 2, 1], 'SAME', name='pooling2')
             x_5 = conv2d(x_4, 'Conv3', 128, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
-            x_6 = conv2d_transpose(x_5, 64, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
+            x_6 = conv2d_transpose(x_5, 'deconv1', 64, [10, 8, 8, 64], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
             x_7 = conv2d(x_6, 'Conv4', 64, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
-            x_8 = conv2d_transpose(x_7, 32, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
-
-            # x_9,x_10,x_11 as reg layer
+            x_8 = conv2d_transpose(x_7, 'deconv2', 32, [10, 8, 8, 32], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
+            # todo: change batch_size for conv2d_transpose output_shape x_6,x_8
+            # x_9,x_10,x_11 as regression layer, corresponding Reg1,Reg2 and Reg3 respectively
             x_9 = conv2d(x_8, 'Reg1', 2, 3, 1, 'SAME', True, tf.nn.relu, self._is_train)
             x_10 = conv2d(x_7, 'Reg2', 2, 3, 1, 'SAME', True, tf.nn.relu, self._is_train)
-            x_11 = conv2d(x_5, 'Reg2', 2, 3, 1, 'SAME', True, tf.nn.relu, self._is_train)
+            x_11 = conv2d(x_5, 'Reg3', 2, 3, 1, 'SAME', True, tf.nn.relu, self._is_train)
         if self._reuse is None:
             self.var_list = tf.get_collection_ref(tf.GraphKeys.GLOBAL_VARIABLES, scope=self._name)
             self.saver = tf.train.Saver(self.var_list)
@@ -45,3 +47,42 @@ class fcnRegressor(object):
         _img_height, _img_width = config["image_size"]
         self.x = tf.placeholder(dtype=tf.float32, shape=[_batch_size, _img_height, _img_width, 1])
         self.y = tf.placeholder(dtype=tf.float32, shape=[_batch_size, _img_height, _img_width, 1])
+        xy = tf.concat([self.x, self.y], axis=3)
+
+        # construct Spatial Transformers
+        self._fcn = FCN('FCN', is_train=_is_train)
+        fcn_out = self._fcn(xy)
+        self._z1 = WarpST(self.x, fcn_out[0], [_img_height, _img_width], name="WrapST_1")
+        self._z2 = WarpST(self.x, fcn_out[1], [_img_height, _img_width], name="WrapST_2")
+        self._z3 = WarpST(self.x, fcn_out[2], [_img_height, _img_width], name="WrapST_3")
+
+        # calculate loss
+        self.loss1 = -ncc(self.y, self._z1)
+        self.loss2 = -ncc(self.y, self._z2)
+        self.loss3 = -ncc(self.y, self._z3)
+        self.loss = self.loss1 + 0.6 * self.loss2 + 0.3 * self.loss3
+
+        # construct train step
+        if _is_train:
+            _optimizer = tf.train.AdadeltaOptimizer(config['learning_rate'])
+            _var_list = self._fcn.var_list
+            self.train_step = _optimizer.minimize(self.loss, var_list=_var_list)
+
+        # initialize all variables
+        self._sess.run(tf.global_variables_initializer())
+
+    def fit(self, batch_x, batch_y):
+        _, loss = self._sess.run(
+            fetches=[self.train_step, self.loss],
+            feed_dict={self.x: batch_x, self.y: batch_y}
+        )
+        return loss
+
+    def deploy(self):
+        pass
+
+    def save(self, sess, save_folder: str):
+        self._fcn.save(sess, os.path.join(save_folder, 'FCN.ckpt'))
+
+    def restore(self, sess, save_folder: str):
+        self._fcn.restore(sess, os.path.join(save_folder, 'FCN.ckpt'))
