@@ -1,5 +1,5 @@
 import tensorflow as tf
-from models.utils import conv2d, conv2d_transpose
+from models.utils import conv2d, conv2d_transpose, reg
 from models.WarpST import WarpST
 from models.utils import ncc, save_image_with_scale
 import os
@@ -22,9 +22,9 @@ class FCN(object):
             x_8 = conv2d_transpose(x_7, 'deconv2', 32, [10, 8, 8, 32], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
             # todo: change batch_size for conv2d_transpose output_shape x_6,x_8
             # x_9,x_10,x_11 as regression layer, corresponding Reg1,Reg2 and Reg3 respectively
-            x_9 = conv2d(x_8, 'Reg1', 2, 3, 1, 'SAME', True, tf.nn.relu, self._is_train)
-            x_10 = conv2d(x_7, 'Reg2', 2, 3, 1, 'SAME', True, tf.nn.relu, self._is_train)
-            x_11 = conv2d(x_5, 'Reg3', 2, 3, 1, 'SAME', True, tf.nn.relu, self._is_train)
+            x_9 = reg(x_8, 'Reg1', 2, 3, 1, 'SAME', self._is_train)
+            x_10 = reg(x_7, 'Reg2', 2, 3, 1, 'SAME', self._is_train)
+            x_11 = reg(x_5, 'Reg3', 2, 3, 1, 'SAME', self._is_train)
         if self._reuse is None:
             self.var_list = tf.get_collection_ref(tf.GraphKeys.GLOBAL_VARIABLES, scope=self._name)
             self.saver = tf.train.Saver(self.var_list)
