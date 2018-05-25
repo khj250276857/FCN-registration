@@ -36,6 +36,14 @@ def conv2d_transpose(x, name, dim, output_shape, k, s, p, bn, af, is_train):
     return x
 
 
+def reg(x, name, dim, k, s, p, is_train):
+    with tf.variable_scope(name):
+        w = tf.get_variable('weight', [k, k, x.get_shape()[-1], dim],
+                            initializer=tf.truncated_normal_initializer(stddev=0.01))
+        x = tf.nn.conv2d(x, w, [1, s, s, 1], p)
+    return x
+
+
 def batch_norm(x, name, momentum=0.9, epsilon=1e-5, is_train=True):
     return tf.contrib.layers.batch_norm(x,
                                         decay=momentum,
