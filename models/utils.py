@@ -23,9 +23,8 @@ def conv2d_transpose(x, name, dim, output_shape, k, s, p, bn, af, is_train):
         w = tf.get_variable('weight', [k, k, dim, x.get_shape()[-1]],
                             initializer=tf.truncated_normal_initializer(stddev=0.01))
         # output_shape = tf.constant([10, 8, 8, 64])
-        print(x)
         x = tf.nn.conv2d_transpose(x, w, output_shape, [1, s, s, 1], p)
-        print(x)
+        # print(x)
         if bn:
             x = batch_norm(x, "bn", is_train=is_train)
         else:

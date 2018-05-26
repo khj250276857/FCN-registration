@@ -1,30 +1,7 @@
 import os
-import tensorflow as tf
 import numpy as np
-from models.fcn import fcnRegressor
-
-
-def train():
-    config = config_folder_guard({
-        # train_parameters
-        'image_size': [128, 128],
-        'batch_size': 10,
-        'learning_rate': 1e-5,
-        'iteration_num': 10000,
-        'save_interval': 2500,
-        # train data folder
-        'checkpoint_dir': r'',
-        'temp_dir': r''
-    })
-
-
-
-
-
-
-
-
-
+from PIL import Image
+import tensorflow as tf
 
 def gen_batches(x_dir: str, y_dir: str, config: dict):
     """
@@ -37,11 +14,12 @@ def gen_batches(x_dir: str, y_dir: str, config: dict):
     :return: Tensor('batch_x', dtype=float32, shape=[batch_size, img_height, img_width, 1])
             Tensor('batch_y', dtype=float32, shape=[batch_size, img_height, img_width, 1])
     """
+    # 获得待配准图像绝对路径列表
     x_arr = [os.path.join(x_dir, _) for _ in os.listdir(x_dir)]
     y_arr = [os.path.join(y_dir, _) for _ in os.listdir(y_dir)]
     # 对绝对路径列表进行排序
-    x_arr.sort(key=lambda _: int(os.path.split(_)[-1].split(".")[0].split("_")[0]))
-    y_arr.sort(key=lambda _: int(os.path.split(_)[-1].split(".")[0].split("_")[0]))
+    x_arr.sort(key=lambda _: int(os.path.split(_)[-1].split(".")[0]))
+    y_arr.sort(key=lambda _: int(os.path.split(_)[-1].split(".")[0]))
     # 如果参考图像数量和待配准图像数量不同，那么意味着出错了
     assert len(x_arr) == len(y_arr)
 
@@ -60,11 +38,3 @@ def gen_batches(x_dir: str, y_dir: str, config: dict):
 
     # 返回batch
     return batch_x, batch_y
-
-
-def config_folder_guard(config: dict):
-    if not os.path.exists(config["checkpoint_dir"]):
-        os.makedirs(config["checkpoint_dir"])
-    if not os.path.exists(config["temp_dir"]):
-        os.makedirs(config["temp_dir"])
-    return config

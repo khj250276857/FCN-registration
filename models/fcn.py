@@ -26,7 +26,7 @@ class FCN(object):
             x_10 = reg(x_7, 'Reg2', 2, 3, 1, 'SAME', self._is_train)
             x_11 = reg(x_5, 'Reg3', 2, 3, 1, 'SAME', self._is_train)
         if self._reuse is None:
-            self.var_list = tf.get_collection_ref(tf.GraphKeys.GLOBAL_VARIABLES, scope=self._name)
+            self.var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=self._name)
             self.saver = tf.train.Saver(self.var_list)
             self._reuse = True
         return x_9, x_10, x_11
@@ -40,7 +40,7 @@ class FCN(object):
 
 class fcnRegressor(object):
     def __init__(self, sess: tf.Session, is_train: bool, config: dict):
-        # get train parameters
+        # get trainNet parameters
         self._sess = sess
         _is_train = is_train
         _batch_size = config['batch_size']
@@ -62,7 +62,7 @@ class fcnRegressor(object):
         self.loss3 = -ncc(self.y, self._z3)
         self.loss = self.loss1 + 0.6 * self.loss2 + 0.3 * self.loss3
 
-        # construct train step
+        # construct trainNet step
         if _is_train:
             _optimizer = tf.train.AdadeltaOptimizer(config['learning_rate'])
             _var_list = self._fcn.var_list
