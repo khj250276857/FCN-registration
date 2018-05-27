@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-import skimage
+from scipy.misc import imsave
 
 def conv2d(x, name, dim, k, s, p, bn, af, is_train):
     with tf.variable_scope(name):
@@ -71,4 +71,4 @@ def save_image_with_scale(path, arr):
     arr = np.clip(arr, 0., 1.)
     arr = arr * 255.
     arr = arr.astype(np.uint8)
-    skimage.io.imsave(path, arr)
+    imsave(path, arr)
