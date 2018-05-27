@@ -47,7 +47,7 @@ class fcnRegressor(object):
         _img_height, _img_width = config["image_size"]
         self.x = tf.placeholder(dtype=tf.float32, shape=[_batch_size, _img_height, _img_width, 1])
         self.y = tf.placeholder(dtype=tf.float32, shape=[_batch_size, _img_height, _img_width, 1])
-        xy = tf.concat([self.x, self.y], axis=3)
+        xy = tf.concat([self.x, self.y], axis=3)    # [batch_size, img_height, img_width, 2]
 
         # construct Spatial Transformers
         self._fcn = FCN('FCN', is_train=_is_train)
@@ -72,14 +72,26 @@ class fcnRegressor(object):
         self._sess.run(tf.global_variables_initializer())
 
     def fit(self, batch_x, batch_y):
-        _, loss = self._sess.run(
-            fetches=[self.train_step, self.loss],
+        _, loss, loss1, loss2, loss3 = self._sess.run(
+            fetches=[self.train_step, self.loss, self.loss1, self.loss2, self.loss3],
             feed_dict={self.x: batch_x, self.y: batch_y}
         )
-        return loss
+        return loss, loss1, loss2, loss3
 
-    def deploy(self):
-        pass
+    def deploy(self, dir_path, x, y, img_start_idx=0):
+        # ca
+        z1, z2, z3 = self._sess.run([self._z1, self._z2, self._z3], feed_dict={self.x: x, self.y: y})
+        loss, loss_1, loss_2, loss_3 = self._sess.run([self.loss, self.loss1, self.loss2, self.loss3],
+                                                      feed_dict={self.x: x, self.y: y})
+        # save image
+        for i in range(z1.shape[0]):
+            _idx = img_start_idx + i + 1
+            save_image_with_scale(dir_path + '/{:>02d}_x.png'.format(_idx), x[i, :, :, 0])
+            save_image_with_scale(dir_path + '/{:>02d}_y.png'.format(_idx), y[i, :, :, 0])
+            save_image_with_scale(dir_path + '/{:>02d}_z1.png'.format(_idx), z1[i, :, :, 0])
+            save_image_with_scale(dir_path + '/{:>02d}_z2.png'.format(_idx), z2[i, :, :, 0])
+            save_image_with_scale(dir_path + '/{:>02d}_z2.png'.format(_idx), z3[i, :, :, 0])
+        return loss, loss_1, loss_2, loss_3
 
     def save(self, sess, save_folder: str):
         self._fcn.save(sess, os.path.join(save_folder, 'FCN.ckpt'))
