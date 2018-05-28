@@ -17,9 +17,9 @@ class FCN(object):
             x_3 = conv2d(x_2, 'Conv2', 64, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
             x_4 = tf.nn.avg_pool(x_3, [1, 3, 3, 1], [1, 2, 2, 1], 'SAME', name='pooling2')
             x_5 = conv2d(x_4, 'Conv3', 128, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
-            x_6 = conv2d_transpose(x_5, 'deconv1', 64, [10, 8, 8, 64], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
+            x_6 = conv2d_transpose(x_5, 'deconv1', 64, [10, 16, 16, 64], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
             x_7 = conv2d(x_6, 'Conv4', 64, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
-            x_8 = conv2d_transpose(x_7, 'deconv2', 32, [10, 8, 8, 32], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
+            x_8 = conv2d_transpose(x_7, 'deconv2', 32, [10, 16, 16, 32], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
             # todo: change batch_size for conv2d_transpose output_shape x_6,x_8
             # x_9,x_10,x_11 as regression layer, corresponding Reg1,Reg2 and Reg3 respectively
             x_9 = reg(x_8, 'Reg1', 2, 3, 1, 'SAME', self._is_train)
@@ -83,15 +83,18 @@ class fcnRegressor(object):
         z1, z2, z3 = self._sess.run([self._z1, self._z2, self._z3], feed_dict={self.x: x, self.y: y})
         loss, loss_1, loss_2, loss_3 = self._sess.run([self.loss, self.loss1, self.loss2, self.loss3],
                                                       feed_dict={self.x: x, self.y: y})
-        # save image
-        for i in range(z1.shape[0]):
-            _idx = img_start_idx + i + 1
-            save_image_with_scale(dir_path + '/{:>02d}_x.png'.format(_idx), x[i, :, :, 0])
-            save_image_with_scale(dir_path + '/{:>02d}_y.png'.format(_idx), y[i, :, :, 0])
-            save_image_with_scale(dir_path + '/{:>02d}_z1.png'.format(_idx), z1[i, :, :, 0])
-            save_image_with_scale(dir_path + '/{:>02d}_z2.png'.format(_idx), z2[i, :, :, 0])
-            save_image_with_scale(dir_path + '/{:>02d}_z2.png'.format(_idx), z3[i, :, :, 0])
-        return loss, loss_1, loss_2, loss_3
+        if dir_path is None:
+            return loss, loss_1, loss_2, loss_3
+        else:
+            # save image
+            for i in range(z1.shape[0]):
+                _idx = img_start_idx + i + 1
+                save_image_with_scale(dir_path + '/{:>02d}_x.png'.format(_idx), x[i, :, :, 0])
+                save_image_with_scale(dir_path + '/{:>02d}_y.png'.format(_idx), y[i, :, :, 0])
+                save_image_with_scale(dir_path + '/{:>02d}_z1.png'.format(_idx), z1[i, :, :, 0])
+                save_image_with_scale(dir_path + '/{:>02d}_z2.png'.format(_idx), z2[i, :, :, 0])
+                save_image_with_scale(dir_path + '/{:>02d}_z2.png'.format(_idx), z3[i, :, :, 0])
+            return loss, loss_1, loss_2, loss_3
 
     def save(self, sess, save_folder: str):
         self._fcn.save(sess, os.path.join(save_folder, 'FCN.ckpt'))
