@@ -17,9 +17,9 @@ class FCN(object):
             x_3 = conv2d(x_2, 'Conv2', 64, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
             x_4 = tf.nn.avg_pool(x_3, [1, 3, 3, 1], [1, 2, 2, 1], 'SAME', name='pooling2')
             x_5 = conv2d(x_4, 'Conv3', 128, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
-            x_6 = conv2d_transpose(x_5, 'deconv1', 64, [10, 16, 16, 64], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
+            x_6 = conv2d_transpose(x_5, 'deconv1', 64, [8, 16, 16, 64], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
             x_7 = conv2d(x_6, 'Conv4', 64, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
-            x_8 = conv2d_transpose(x_7, 'deconv2', 32, [10, 16, 16, 32], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
+            x_8 = conv2d_transpose(x_7, 'deconv2', 32, [8, 16, 16, 32], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
             # todo: change batch_size for conv2d_transpose output_shape x_6,x_8
             # x_9,x_10,x_11 as regression layer, corresponding Reg1,Reg2 and Reg3 respectively
             x_9 = reg(x_8, 'Reg1', 2, 3, 1, 'SAME', self._is_train)
