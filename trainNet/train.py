@@ -10,7 +10,7 @@ def train():
     config = config_folder_guard({
         # train_parameters
         'image_size': [256, 256],
-        'batch_size': 10,
+        'batch_size': 8,
         'learning_rate': 1e-5,
         'epoch_num': 500,
         'save_interval': 1,
@@ -22,15 +22,15 @@ def train():
     })
 
     #定义验证集和训练集
-    train_x_dir = r'E:\training data\MR Cardiac\pairs_train\all_moving_pairs'
-    train_y_dir = r'E:\training data\MR Cardiac\pairs_train\all_fixed_pairs'
+    train_x_dir = r'E:\training data\MR Cardiac(2)\train\moving'
+    train_y_dir = r'E:\training data\MR Cardiac(2)\train\fixed'
     batch_x, batch_y = gen_batches(train_x_dir, train_y_dir, {
         'batch_size': config['batch_size'],
         'image_size': config['image_size'],
         'shuffle_batch': config['shuffle_batch']
     })
-    valid_x_dir = r'E:\training data\MR Cardiac\pairs_validate\all_moving_pairs'
-    valid_y_dir = r'E:\training data\MR Cardiac\pairs_validate\all_fixed_pairs'
+    valid_x_dir = r'E:\training data\MR Cardiac(2)\validate\moving'
+    valid_y_dir = r'E:\training data\MR Cardiac(2)\validate\fixed'
     valid_x, valid_y = gen_batches(valid_x_dir, valid_y_dir, {
         'batch_size': config['batch_size'],
         'image_size': config['image_size'],
