@@ -72,3 +72,9 @@ def save_image_with_scale(path, arr):
     arr = arr * 255.
     arr = arr.astype(np.uint8)
     imsave(path, arr)
+
+
+def dropout(x, keepPro, name=None):
+    return tf.nn.dropout(x, keepPro, name)
+
+
