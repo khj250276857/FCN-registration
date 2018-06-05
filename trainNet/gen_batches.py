@@ -28,8 +28,11 @@ def gen_batches(x_dir: str, y_dir: str, config: dict):
     batch_x, batch_y = tf.train.batch(input_queue, batch_size=config["batch_size"])
 
     # 定义处理tensor的外部python函数
+    # def _f(input_tensor, batch_size: int, img_height: int, img_width: int, channels: int):
+    #     _ = np.stack([np.array(Image.open(img_name)) for img_name in input_tensor], axis=0) / 255
+    #     return _.astype(np.float32).reshape([batch_size, img_height, img_width, channels])
     def _f(input_tensor, batch_size: int, img_height: int, img_width: int, channels: int):
-        _ = np.stack([np.array(Image.open(img_name)) for img_name in input_tensor], axis=0) / 255
+        _ = np.stack([noralize(np.array(Image.open(img_name))) for img_name in input_tensor], axis=0)
         return _.astype(np.float32).reshape([batch_size, img_height, img_width, channels])
 
     # 应用外部python函数处理tensor
@@ -38,3 +41,9 @@ def gen_batches(x_dir: str, y_dir: str, config: dict):
 
     # 返回batch
     return batch_x, batch_y
+
+
+def noralize(input_array):
+    norm_array = (input_array - np.mean(input_array)) / np.std(input_array)
+    output_array = (norm_array - np.min(norm_array)) / (np.max(norm_array) - np.min(norm_array))
+    return output_array
