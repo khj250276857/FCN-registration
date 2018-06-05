@@ -24,7 +24,6 @@ def conv2d_transpose(x, name, dim, output_shape, k, s, p, bn, af, is_train):
                             initializer=tf.truncated_normal_initializer(stddev=0.01))
         # output_shape = tf.constant([10, 8, 8, 64])
         x = tf.nn.conv2d_transpose(x, w, output_shape, [1, s, s, 1], p)
-        # print(x)
         if bn:
             x = batch_norm(x, "bn", is_train=is_train)
         else:
@@ -67,6 +66,27 @@ def mse(x, y):
     return tf.reduce_mean(tf.square(x - y))
 
 
+def grad(v):
+    num_batch = v.shape[0]
+    height = v.shape[1]
+    width = v.shape[2]
+    channels = v.shape[3]
+
+    grad_x = 0
+    grad_y = 0
+    for num in range(num_batch):
+        v_x = v[num, :, :, 0]
+        v_y = v[num, :, :, 1]
+        for i in range(1, height-1):
+            for j in range(1, width-1):
+                grad_x_temp = abs(v_x[i, j-1] - v_x[i, j]) + abs(v_x[i, j] - v_x[i, j+1]) + abs(v_x[i-1, j] - v_x[i, j]) + abs(v_x[i, j] - v_x[i+1, j])
+                grad_y_temp = abs(v_y[i, j-1] - v_y[i, j]) + abs(v_y[i, j] - v_y[i, j+1]) + abs(v_y[i-1, j] - v_y[i, j]) + abs(v_y[i, j] - v_y[i+1, j])
+                grad_x += grad_x_temp
+                grad_y += grad_y_temp
+    grad_result = grad_x + grad_y
+    return grad_result
+
+
 def save_image_with_scale(path, arr):
     arr = np.clip(arr, 0., 1.)
     arr = arr * 255.
@@ -74,7 +94,6 @@ def save_image_with_scale(path, arr):
     imsave(path, arr)
 
 
-def dropout(x, keepPro, name=None):
-    return tf.nn.dropout(x, keepPro, name)
+
 
 
