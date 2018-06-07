@@ -11,8 +11,8 @@ def train():
         # train_parameters
         'image_size': [128, 128],
         'batch_size': 10,
-        'learning_rate': 1e-4,
-        'epoch_num': 100,
+        'learning_rate': 1e-3,
+        'epoch_num': 200,
         'save_interval': 2,
         'shuffle_batch': True,
         # trainNet data folder
@@ -37,9 +37,9 @@ def train():
         'shuffle_batch': config['shuffle_batch']
     })
     # config['train_iter_num'] = len(os.listdir(train_x_dir)) // config["batch_size"]
-    config['valid_iter_num'] = len(os.listdir(valid_x_dir)) // config['batch_size']
-    config['train_iter_num'] = 1000
-    # config['valid_iter_num'] = 100
+    # config['valid_iter_num'] = len(os.listdir(valid_x_dir)) // config['batch_size']
+    config['train_iter_num'] = 400
+    config['valid_iter_num'] = 20
 
     #定义日志记录器
     train_log = logger(config['log_dir'], 'train.log')
@@ -66,9 +66,9 @@ def train():
             _train_L1.append(_loss_train[1])
             _train_L2.append(_loss_train[2])
             _train_L3.append(_loss_train[3])
-            print('[TRAIN] epoch={:>3d}, iter={:>5d}, loss={:.4f}, loss_1={:.4f}, loss_2={:.4f}, loss_3={:.4f}'
-                  .format(epoch + 1, i + 1, _loss_train[0], _loss_train[1], _loss_train[2], _loss_train[3]))
-        # print('[TRAIN] epoch={:>3d}, loss={:.4f}..................'.format(epoch + 1, sum(_train_L) / len(_train_L)))
+            print('[TRAIN] epoch={:>3d}, iter={:>5d}, loss={:.4f}, loss_1={:.4f}, loss_2={:.4f}, loss_3={:.4f}, loss_4={:.4f}, loss_5={:.4f}, loss_6={:.4f}'
+                  .format(epoch + 1, i + 1, _loss_train[0], _loss_train[1], _loss_train[2], _loss_train[3], _loss_train[4], _loss_train[5], _loss_train[6]))
+        print('[TRAIN] epoch={:>3d}, loss={:.4f}..................'.format(epoch + 1, sum(_train_L) / len(_train_L)))
         train_log.info('[TRAIN] epoch={:>3d}, loss={:.4f}, loss_1 = {:.4f}, loss_2 = {:.4f}, loss_3 = {:.4f}'
                        .format(epoch + 1, sum(_train_L) / len(_train_L), sum(_train_L1) / len(_train_L1), sum(_train_L2) / len(_train_L2), sum(_train_L3) / len(_train_L3)))
 
@@ -84,8 +84,8 @@ def train():
             _valid_L1.append(_loss_valid[1])
             _valid_L2.append(_loss_valid[2])
             _valid_L3.append(_loss_valid[3])
-            print('[VALID] epoch={:>3d}, iter={:>5d}, loss={:.4f}, loss_1={:.4f}, loss_2={:.4f}, loss_3={:.4f}'
-                  .format(epoch + 1, j + 1, _loss_valid[0], _loss_valid[1], _loss_valid[2], _loss_valid[3]))
+            print('[VALID] epoch={:>3d}, iter={:>5d}, loss={:.4f}, loss_1={:.4f}, loss_2={:.4f}, loss_3={:.4f}, loss_4={:.4f}, loss_5={:.4f}, loss_6={:.4f}'
+                  .format(epoch + 1, j + 1, _loss_valid[0], _loss_valid[1], _loss_valid[2], _loss_valid[3], _loss_valid[4], _loss_valid[5], _loss_valid[6]))
         print('[VALID] epoch={:>3d}, loss={:.4f}..................'.format(epoch + 1, sum(_valid_L) / len(_valid_L)))
         valid_log.info('[VALID] epoch={:>3d}, loss={:.4f}, loss_1 = {:.4f}, loss_2 = {:.4f}, loss_3 = {:.4f}'
                        .format(epoch + 1, sum(_valid_L) / len(_valid_L), sum(_valid_L1) / len(_valid_L1), sum(_valid_L2) / len(_valid_L2), sum(_valid_L3) / len(_valid_L3)))
