@@ -67,6 +67,7 @@ def mse(x, y):
 
 
 def grad(v):
+
     num_batch = v.shape[0]
     height = v.shape[1]
     width = v.shape[2]
