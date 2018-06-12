@@ -11,7 +11,7 @@ def train():
         # train_parameters
         'image_size': [128, 128],
         'batch_size': 10,
-        'learning_rate': 1e-3,
+        'learning_rate': 1e-4,
         'epoch_num': 200,
         'save_interval': 2,
         'shuffle_batch': True,
@@ -38,7 +38,7 @@ def train():
     })
     # config['train_iter_num'] = len(os.listdir(train_x_dir)) // config["batch_size"]
     # config['valid_iter_num'] = len(os.listdir(valid_x_dir)) // config['batch_size']
-    config['train_iter_num'] = 400
+    config['train_iter_num'] = 200
     config['valid_iter_num'] = 20
 
     #定义日志记录器
