@@ -12,7 +12,7 @@ def train():
         'image_size': [128, 128],
         'batch_size': 10,
         'learning_rate': 1e-4,
-        'epoch_num': 200,
+        'epoch_num': 500,
         'save_interval': 2,
         'shuffle_batch': True,
         # trainNet data folder
