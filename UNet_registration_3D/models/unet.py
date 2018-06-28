@@ -18,6 +18,7 @@ class UNet(object):
 
     def __call__(self, x):
         with tf.variable_scope(self._name, reuse=self._reuse):
+            batch_size = 10
             # encoding path
             x_1 = conv3d(x, 'Conv1', 16, 3, 1, 'SAME', True, tf.nn.leaky_relu, self._is_train)
             x_2 = conv3d(x_1, 'Conv2', 32, 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
@@ -25,14 +26,14 @@ class UNet(object):
             x_4 = conv3d(x_3, 'Conv4', 32, 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
             x_5 = conv3d(x_4, 'Conv5', 32, 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
             # decoding path
-            x_6 = conv3d_transpose(x_5, 'Deconv1', 32, [10, 16, 16, 16, 32], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
+            x_6 = conv3d_transpose(x_5, 'Deconv1', 32, [batch_size, 16, 16, 16, 32], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
             x_6_out = tf.concat([x_6, x_4], axis=0)
-            x_7 = conv3d_transpose(x_6_out, 'Deconv2', 32, [10, 32, 32, 32, 32], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
+            x_7 = conv3d_transpose(x_6_out, 'Deconv2', 32, [batch_size, 32, 32, 32, 32], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
             x_7_out = tf.concat([x_7, x_3], axis=0)
-            x_8 = conv3d_transpose(x_7_out, 'Deconv3', 32, [10, 64, 64, 64, 32], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
+            x_8 = conv3d_transpose(x_7_out, 'Deconv3', 32, [batch_size, 64, 64, 64, 32], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
             x_8_out = tf.concat([x_8, x_2], axis=0)
             x_9 = conv3d(x_8_out, 'Conv6', 32, 3, 1, 'SAME', True, tf.nn.leaky_relu, self._is_train)
-            x_10 = conv3d_transpose(x_9, 'Deconv4', 16, [10, 128, 128, 128, 16], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
+            x_10 = conv3d_transpose(x_9, 'Deconv4', 16, [batch_size, 128, 128, 128, 16], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
             x_10_out = tf.concat([x_10, x_1], axis=0)
             x_11 = conv3d(x_10_out, 'Conv7', 16, 3, 1, 'SAME', True, tf.nn.leaky_relu, self._is_train)
             x_12 = conv3d(x_11, 'Conv8', 3, 3, 1, 'SAME', True, tf.nn.leaky_relu, self._is_train)
