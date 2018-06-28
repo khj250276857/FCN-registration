@@ -1,7 +1,7 @@
 import tensorflow as tf
-from models.utils import conv2d, conv2d_transpose, reg
-from models.WarpST import WarpST
-from models.utils import ncc, save_image_with_scale, grad
+from FCN_registration_3D.models.utils import conv3d, conv3d_transpose, reg
+from FCN_registration_3D.models.WarpST import WarpST
+from FCN_registration_3D.models.utils import ncc, save_image_with_scale, grad
 import os
 
 class FCN(object):
@@ -12,14 +12,14 @@ class FCN(object):
 
     def __call__(self, x):
         with tf.variable_scope(self._name, reuse=self._reuse):
-            x_1 = conv2d(x, 'Conv1', 32, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
+            x_1 = conv3d(x, 'Conv1', 32, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
             x_2 = tf.nn.avg_pool(x_1, [1, 3, 3, 1], [1, 2, 2, 1], 'SAME', name='pooling1')
-            x_3 = conv2d(x_2, 'Conv2', 64, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
+            x_3 = conv3d(x_2, 'Conv2', 64, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
             x_4 = tf.nn.avg_pool(x_3, [1, 3, 3, 1], [1, 2, 2, 1], 'SAME', name='pooling2')
-            x_5 = conv2d(x_4, 'Conv3', 128, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
-            x_6 = conv2d_transpose(x_5, 'deconv1', 64, [10, 8, 8, 64], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
-            x_7 = conv2d(x_6, 'Conv4', 64, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
-            x_8 = conv2d_transpose(x_7, 'deconv2', 32, [10, 8, 8, 32], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
+            x_5 = conv3d(x_4, 'Conv3', 128, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
+            x_6 = conv3d_transpose(x_5, 'deconv1', 64, [10, 8, 8, 64], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
+            x_7 = conv3d(x_6, 'Conv4', 64, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
+            x_8 = conv3d_transpose(x_7, 'deconv2', 32, [10, 8, 8, 32], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
             # todo: change batch_size for conv2d_transpose output_shape x_6,x_8
             # x_9,x_10,x_11 as regression layer, corresponding Reg1,Reg2 and Reg3 respectively
             x_9 = reg(x_8, 'Reg1', 2, 3, 1, 'SAME', self._is_train)
@@ -52,7 +52,7 @@ class fcnRegressor(object):
         # construct Spatial Transformers
         self._fcn = FCN('FCN', is_train=_is_train)
         fcn_out = self._fcn(xy)
-        # todo: remove it
+
         self._v1 = fcn_out[0]
         self._v2 = fcn_out[1]
         self._v3 = fcn_out[2]
@@ -79,7 +79,7 @@ class fcnRegressor(object):
         self._sess.run(tf.global_variables_initializer())
 
     def fit(self, batch_x, batch_y):
-        _, loss, loss1, loss2, loss3 , loss4, loss5, loss6= self._sess.run(
+        _, loss, loss1, loss2, loss3 , loss4, loss5, loss6 = self._sess.run(
             fetches=[self.train_step, self.loss, self.loss1, self.loss2, self.loss3, self.loss4, self.loss5, self.loss6],
             feed_dict={self.x: batch_x, self.y: batch_y}
         )
