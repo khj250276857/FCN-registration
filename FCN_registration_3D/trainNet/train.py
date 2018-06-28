@@ -1,9 +1,9 @@
 import os
 import tensorflow as tf
-from models.fcn import fcnRegressor
-from trainNet.config_folder_guard import config_folder_guard
-from trainNet.gen_batches import gen_batches
-from trainNet.logger import my_logger as logger
+from FCN_registration_3D.models.fcn import fcnRegressor
+from FCN_registration_3D.trainNet.config_folder_guard import config_folder_guard
+from FCN_registration_3D.trainNet.gen_batches import gen_batches
+from FCN_registration_3D.trainNet.logger import my_logger as logger
 
 
 def train():
