@@ -1,5 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Time    : 2018/6/28 20:22
+# @Author  : Hongjian Kang
+# @File    : WarpST.py
+
 import tensorflow as tf
-from FCN_registration_3D.models.bicubic_interpolation import bicubic_interp_2d
+from UNet_registration_3D.models.bicubic_interpolation import bicubic_interp_2d
 
 
 def WarpST(U, V, out_size, name='DeformableTransformer', **kwargs):
