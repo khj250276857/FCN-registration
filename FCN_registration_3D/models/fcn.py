@@ -13,18 +13,18 @@ class FCN(object):
     def __call__(self, x):
         with tf.variable_scope(self._name, reuse=self._reuse):
             x_1 = conv3d(x, 'Conv1', 32, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
-            x_2 = tf.nn.avg_pool(x_1, [1, 3, 3, 1], [1, 2, 2, 1], 'SAME', name='pooling1')
+            x_2 = tf.nn.avg_pool(x_1, [1, 3, 3, 3, 1], [1, 2, 2, 2, 1], 'SAME', name='pooling1')
             x_3 = conv3d(x_2, 'Conv2', 64, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
-            x_4 = tf.nn.avg_pool(x_3, [1, 3, 3, 1], [1, 2, 2, 1], 'SAME', name='pooling2')
+            x_4 = tf.nn.avg_pool(x_3, [1, 3, 3, 3, 1], [1, 2, 2, 2, 1], 'SAME', name='pooling2')
             x_5 = conv3d(x_4, 'Conv3', 128, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
-            x_6 = conv3d_transpose(x_5, 'deconv1', 64, [10, 8, 8, 64], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
+            x_6 = conv3d_transpose(x_5, 'deconv1', 64, [10, 8, 8, 8, 64], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
             x_7 = conv3d(x_6, 'Conv4', 64, 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
-            x_8 = conv3d_transpose(x_7, 'deconv2', 32, [10, 8, 8, 32], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
+            x_8 = conv3d_transpose(x_7, 'deconv2', 32, [10, 8, 8, 8, 32], 3, 2, 'SAME', True, tf.nn.relu, self._is_train)
             # todo: change batch_size for conv2d_transpose output_shape x_6,x_8
             # x_9,x_10,x_11 as regression layer, corresponding Reg1,Reg2 and Reg3 respectively
-            x_9 = reg(x_8, 'Reg1', 2, 3, 1, 'SAME', self._is_train)
-            x_10 = reg(x_7, 'Reg2', 2, 3, 1, 'SAME', self._is_train)
-            x_11 = reg(x_5, 'Reg3', 2, 3, 1, 'SAME', self._is_train)
+            x_9 = reg(x_8, 'Reg1', 3, 3, 1, 'SAME', self._is_train)
+            x_10 = reg(x_7, 'Reg2', 3, 3, 1, 'SAME', self._is_train)
+            x_11 = reg(x_5, 'Reg3', 3, 3, 1, 'SAME', self._is_train)
         if self._reuse is None:
             self.var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=self._name)
             self.saver = tf.train.Saver(self.var_list)
@@ -37,7 +37,7 @@ class FCN(object):
     def restore(self, session, checkpoint_path):
         self.saver.restore(session, checkpoint_path)
 
-
+# todo: modify it to 3D
 class fcnRegressor(object):
     def __init__(self, sess: tf.Session, is_train: bool, config: dict):
         # get trainNet parameters
