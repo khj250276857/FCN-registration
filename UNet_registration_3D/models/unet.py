@@ -6,12 +6,12 @@
 
 import tensorflow as tf
 from UNet_registration_3D.models.utils import conv3d, conv3d_transpose
-from UNet_registration_3D.models.WarpST import WarpST
-from UNet_registration_3D.models.utils import ncc, save_image_with_scale, grad
+from UNet_registration_3D.models.spatial_transformer_3d import SpatialTransformer3D
+from UNet_registration_3D.models.utils import ncc_3d, save_image_with_scale, grad_3d
 import os
 
 class UNet(object):
-    def __init__(self, name:str, is_train:bool):
+    def __init__(self, name: str, is_train: bool):
         self._name = name
         self._is_train = is_train
         self._reuse = None
@@ -51,26 +51,27 @@ class UNet(object):
 
 
 class unetRegressor(object):
-    def __init__(self, sess:tf.Session, is_train:bool, config:dict):
+    def __init__(self, sess: tf.Session, is_train: bool, config: dict):
         self._sess = sess
         _is_train = is_train
         _batch_size = config['batch_size']
         _img_depth, _img_height, _img_width = config["image_size"]
         self.x = tf.placeholder(dtype=tf.float32, shape=[_batch_size, _img_depth, _img_height, _img_width, 1])
         self.y = tf.placeholder(dtype=tf.float32, shape=[_batch_size, _img_depth, _img_height, _img_width, 1])
-        xy = tf.concat([self.x, self.y], axis=4)  # [batch_size, img_depth, img_height, img_width, 2]
+        self.xy = tf.concat([self.x, self.y], axis=4)  # [batch_size, img_depth, img_height, img_width, 2]
 
         # construct Spatial Transformers
         self._unet = UNet('UNet', is_train=_is_train)
-        unet_out = self._unet(xy)
+        unet_out = self._unet(tf.trself.xy)
 
-        # todo: reconstruct it
+        # todo: reedit it
         self.v = unet_out
-        self.z = WarpST(self.x, unet_out, [_img_depth, _img_height, _img_width], name='WarpST')
+        self.spatial_transformer = SpatialTransformer3D()
+        self.z = self.spatial_transformer.transform(self.x, self.v)
 
         # calculate loss
-        self.loss1 = -ncc(self.y, self.z)
-        self.loss2 = grad(self.v)/128**3
+        self.loss1 = -ncc_3d(self.y, self.z)
+        self.loss2 = grad_3d(self.v)
         self.loss = self.loss1 + self.loss2
 
         # construct trainNet step
