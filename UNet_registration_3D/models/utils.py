@@ -51,7 +51,7 @@ def batch_norm(x, name, momentum=0.9, epsilon=1e-5, is_train=True):
                                         scope=name)
 
 
-def ncc(x, y):
+def ncc_2d(x, y):
     mean_x = tf.reduce_mean(x, [1, 2, 3], keepdims=True)
     mean_y = tf.reduce_mean(y, [1, 2, 3], keepdims=True)
     mean_x2 = tf.reduce_mean(tf.square(x), [1, 2, 3], keepdims=True)
@@ -61,30 +61,55 @@ def ncc(x, y):
     return tf.reduce_mean((x - mean_x) * (y - mean_y) / (stddev_x * stddev_y))
 
 
+def ncc_3d(x, y):
+    mean_x = tf.reduce_mean(x, [1, 2, 3, 4], keepdims=True)
+    mean_y = tf.reduce_mean(y, [1, 2, 3, 4], keepdims=True)
+    mean_x2 = tf.reduce_mean(tf.square(x), [1, 2, 3, 4], keepdims=True)
+    mean_y2 = tf.reduce_mean(tf.square(y), [1, 2, 3, 4], keepdims=True)
+    stddev_x = tf.reduce_sum(tf.sqrt(mean_x2 - tf.square(mean_x)), [1, 2, 3, 4], keepdims=True)
+    stddev_y = tf.reduce_sum(tf.sqrt(mean_y2 - tf.square(mean_y)), [1, 2, 3, 4], keepdims=True)
+    return tf.reduce_mean((x - mean_x) * (y - mean_y) / (stddev_x * stddev_y))
+
 def mse(x, y):
     return tf.reduce_mean(tf.square(x - y))
 
 
-def grad(v):
+def grad_2d(v):
+    """
+        vectorized version of grad_xy
+        :param deformation_field_matrix: 形变场矩阵（Tensor）
+            shape: [batch_size, img_height, img_width, channels]
+            typically, shape is [32, 8, 8, 2]
+            dtype: float32
+        :return: grad
+        for a matrix
+        [[3 4 5],
+         [6 7 8],
+         [9 1 2]]
+        grad_x = reduce_sum(abs(
+                [[4, 5],[7, 8], [1, 2]] - [[3, 4], [6, 7], [9, 1]]
+            ))
+        grad_y = reduce_sum(abs(
+                [[6, 7, 8], [9, 1, 2]] - [[3, 4, 5], [6, 7, 8]]
+            ))
+        grad = grad_x + grad_y
+        """
+    img_height = v.shape[1]
+    img_width = v.shape[2]
+    grad_x = tf.reduce_sum(tf.abs(v[:, :, :img_width - 1, :] - v[:, :, 1:, :]))
+    grad_y = tf.reduce_sum(tf.abs(v[:, :img_height - 1, :, :] - v[:, 1:, :, :]))
+    return grad_x + grad_y
 
-    num_batch = v.shape[0]
-    height = v.shape[1]
-    width = v.shape[2]
-    channels = v.shape[3]
 
-    grad_x = 0
-    grad_y = 0
-    for num in range(num_batch):
-        v_x = v[num, :, :, 0]
-        v_y = v[num, :, :, 1]
-        for i in range(1, height-1):
-            for j in range(1, width-1):
-                grad_x_temp = abs(v_x[i, j-1] - v_x[i, j]) + abs(v_x[i, j] - v_x[i, j+1]) + abs(v_x[i-1, j] - v_x[i, j]) + abs(v_x[i, j] - v_x[i+1, j])
-                grad_y_temp = abs(v_y[i, j-1] - v_y[i, j]) + abs(v_y[i, j] - v_y[i, j+1]) + abs(v_y[i-1, j] - v_y[i, j]) + abs(v_y[i, j] - v_y[i+1, j])
-                grad_x += grad_x_temp
-                grad_y += grad_y_temp
-    grad_result = grad_x + grad_y
-    return grad_result
+def grad_3d(v):
+    """vectorized version of gradient against x, y, z axis"""
+    img_height = v.shape[1]
+    img_width = v.shape[2]
+    img_depth = v.shape[3]
+    grad_x = tf.reduce_sum(tf.abs(v[:, :, 1:, :, :] - v[:, :, :img_width - 1, :, :]))
+    grad_y = tf.reduce_sum(tf.abs(v[:, 1:, :, :, :] - v[:, :img_height - 1, :, :, :]))
+    grad_z = tf.reduce_sum(tf.abs(v[:, :, :, 1:, :] - v[:, :, :, :img_depth - 1, :]))
+    return grad_x + grad_y + grad_z
 
 
 def save_image_with_scale(path, arr):
