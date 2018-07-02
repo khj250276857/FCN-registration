@@ -18,7 +18,7 @@ class UNet(object):
 
     def __call__(self, x):
         with tf.variable_scope(self._name, reuse=self._reuse):
-            batch_size = 10
+            batch_size = 2
             # encoding path
             x_1 = conv3d(x, 'Conv1', 16, 3, 1, 'SAME', True, tf.nn.leaky_relu, self._is_train)
             x_2 = conv3d(x_1, 'Conv2', 32, 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
@@ -26,15 +26,15 @@ class UNet(object):
             x_4 = conv3d(x_3, 'Conv4', 32, 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
             x_5 = conv3d(x_4, 'Conv5', 32, 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
             # decoding path
-            x_6 = conv3d_transpose(x_5, 'Deconv1', 32, [batch_size, 16, 16, 16, 32], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
-            x_6_out = tf.concat([x_6, x_4], axis=0)
-            x_7 = conv3d_transpose(x_6_out, 'Deconv2', 32, [batch_size, 32, 32, 32, 32], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
-            x_7_out = tf.concat([x_7, x_3], axis=0)
-            x_8 = conv3d_transpose(x_7_out, 'Deconv3', 32, [batch_size, 64, 64, 64, 32], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
-            x_8_out = tf.concat([x_8, x_2], axis=0)
+            x_6 = conv3d_transpose(x_5, 'Deconv1', 32, [batch_size, 8, 8, 8, 32], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
+            x_6_out = tf.concat([x_6, x_4], axis=4, name='CA1')
+            x_7 = conv3d_transpose(x_6_out, 'Deconv2', 32, [batch_size, 16, 16, 16, 32], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
+            x_7_out = tf.concat([x_7, x_3], axis=4, name='CA2')
+            x_8 = conv3d_transpose(x_7_out, 'Deconv3', 32, [batch_size, 32, 32, 32, 32], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
+            x_8_out = tf.concat([x_8, x_2], axis=4, name='CA3')
             x_9 = conv3d(x_8_out, 'Conv6', 32, 3, 1, 'SAME', True, tf.nn.leaky_relu, self._is_train)
-            x_10 = conv3d_transpose(x_9, 'Deconv4', 16, [batch_size, 128, 128, 128, 16], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
-            x_10_out = tf.concat([x_10, x_1], axis=0)
+            x_10 = conv3d_transpose(x_9, 'Deconv4', 16, [batch_size, 64, 64, 64, 16], 3, 2, 'SAME', True, tf.nn.leaky_relu, self._is_train)
+            x_10_out = tf.concat([x_10, x_1], axis=4, name='CA4')
             x_11 = conv3d(x_10_out, 'Conv7', 16, 3, 1, 'SAME', True, tf.nn.leaky_relu, self._is_train)
             x_12 = conv3d(x_11, 'Conv8', 3, 3, 1, 'SAME', True, tf.nn.leaky_relu, self._is_train)
         if self._reuse is None:
@@ -56,22 +56,22 @@ class unetRegressor(object):
         _is_train = is_train
         _batch_size = config['batch_size']
         _img_depth, _img_height, _img_width = config["image_size"]
-        self.x = tf.placeholder(dtype=tf.float32, shape=[_batch_size, _img_depth, _img_height, _img_width, 1])
-        self.y = tf.placeholder(dtype=tf.float32, shape=[_batch_size, _img_depth, _img_height, _img_width, 1])
-        self.xy = tf.concat([self.x, self.y], axis=4)  # [batch_size, img_depth, img_height, img_width, 2]
+        self.x = tf.placeholder(dtype=tf.float32, shape=[_batch_size, _img_height, _img_width, _img_depth, 1])
+        self.y = tf.placeholder(dtype=tf.float32, shape=[_batch_size, _img_height, _img_width, _img_depth, 1])
+        self.xy = tf.concat([self.x, self.y], axis=4)  # [batch_size, img_height, img_width, img_depth, 2]
 
         # construct Spatial Transformers
         self._unet = UNet('UNet', is_train=_is_train)
-        unet_out = self._unet(tf.trself.xy)
+        self.unet_out = self._unet(tf.transpose(self.xy, perm=[0, 3, 1, 2, 4]))
+        self.v = tf.transpose(self.unet_out, perm=[0, 2, 3, 1, 4])
 
         # todo: reedit it
-        self.v = unet_out
         self.spatial_transformer = SpatialTransformer3D()
         self.z = self.spatial_transformer.transform(self.x, self.v)
 
         # calculate loss
         self.loss1 = -ncc_3d(self.y, self.z)
-        self.loss2 = grad_3d(self.v)
+        self.loss2 = grad_3d(self.v)/10000000
         self.loss = self.loss1 + self.loss2
 
         # construct trainNet step
@@ -88,6 +88,7 @@ class unetRegressor(object):
             fetches=[self.train_step, self.loss, self.loss1, self.loss2],
             feed_dict={self.x: batch_x, self.y: batch_y}
         )
+        return loss, loss1, loss2
 
     def deploy(self):
         pass
