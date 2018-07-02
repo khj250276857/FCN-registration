@@ -79,7 +79,7 @@ class fcnRegressor(object):
         self._sess.run(tf.global_variables_initializer())
 
     def fit(self, batch_x, batch_y):
-        _, loss, loss1, loss2, loss3 , loss4, loss5, loss6= self._sess.run(
+        _, loss, loss1, loss2, loss3, loss4, loss5, loss6 = self._sess.run(
             fetches=[self.train_step, self.loss, self.loss1, self.loss2, self.loss3, self.loss4, self.loss5, self.loss6],
             feed_dict={self.x: batch_x, self.y: batch_y}
         )
