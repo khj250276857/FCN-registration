@@ -21,7 +21,7 @@ class SpatialTransformer3D(object):
             shape: [batch_size, height, width, depth, 3] (3 for x, y, z axis, respectively)
         :return:
         """
-        def_vec = interpolate_3d(def_vec, *def_vec.shape, *img.shape[1:4])
+        # def_vec = interpolate_3d(def_vec, *def_vec.shape, *img.shape[1:4])
         dx = def_vec[:, :, :, :, 0]
         dy = def_vec[:, :, :, :, 1]
         dz = def_vec[:, :, :, :, 2]
