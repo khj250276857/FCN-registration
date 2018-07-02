@@ -15,9 +15,9 @@ from UNet_registration_3D.trainNet.logger import my_logger as logger
 def train():
     config = config_folder_guard({
         # train_parameters
-        'image_size': [128, 128, 128],
-        'batch_size': 10,
-        'learning_rate': 1e-4,
+        'image_size': [64, 64, 64],
+        'batch_size': 2,    # todo: change batch_size in unet
+        'learning_rate': 1e-2,
         'epoch_num': 500,
         'save_interval': 2,
         'shuffle_batch': True,
@@ -27,9 +27,9 @@ def train():
         'log_dir': r'E:\training data\running data\log'
     })
 
-    #定义验证集和训练集
-    train_x_dir = r'E:\training data\pet_ct_registration\normolized_pt_train'
-    train_y_dir = r'E:\training data\pet_ct_registration\resized_ct_train'
+    #定义训练集和验证集
+    train_x_dir = r'E:\training data\3D volume\pt volume'
+    train_y_dir = r'E:\training data\3D volume\ct volume'
     batch_x, batch_y = gen_batches(train_x_dir, train_y_dir, {
         'batch_size': config['batch_size'],
         'image_size': config['image_size'],
@@ -42,10 +42,10 @@ def train():
         'image_size': config['image_size'],
         'shuffle_batch': config['shuffle_batch']
     })
-    # config['train_iter_num'] = len(os.listdir(train_x_dir)) // config["batch_size"]
-    # config['valid_iter_num'] = len(os.listdir(valid_x_dir)) // config['batch_size']
-    config['train_iter_num'] = 200
-    config['valid_iter_num'] = 20
+    config['train_iter_num'] = len(os.listdir(train_x_dir)) // config["batch_size"]
+    config['valid_iter_num'] = len(os.listdir(valid_x_dir)) // config['batch_size']
+    # config['train_iter_num'] = 200
+    # config['valid_iter_num'] = 20
 
     #定义日志记录器
     train_log = logger(config['log_dir'], 'train.log')
