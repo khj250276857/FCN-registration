@@ -8,6 +8,7 @@ import tensorflow as tf
 from UNet_registration_3D.models.utils import conv3d, conv3d_transpose
 from UNet_registration_3D.models.spatial_transformer_3d import SpatialTransformer3D
 from UNet_registration_3D.models.utils import ncc_3d, save_image_with_scale, grad_3d
+import pickle as pkl
 import os
 
 class UNet(object):
@@ -71,8 +72,8 @@ class unetRegressor(object):
 
         # calculate loss
         self.loss1 = -ncc_3d(self.y, self.z)
-        self.loss2 = grad_3d(self.v)/10000000
-        self.loss = self.loss1 + self.loss2
+        self.loss2 = grad_3d(self.v)
+        self.loss = self.loss1 + self.loss2 / 1000000
 
         # construct trainNet step
         if _is_train:
@@ -90,8 +91,31 @@ class unetRegressor(object):
         )
         return loss, loss1, loss2
 
-    def deploy(self):
-        pass
+    def deploy(self, batch_x, batch_y, save_path, patch_name_start_index=0):
+        z, loss, loss1, loss2 = self._sess.run(
+            fetches=[self.z, self.loss, self.loss1, self.loss2],
+            feed_dict={self.x: batch_x, self.y: batch_y}
+        )
+
+        if save_path is not None:
+            print('z.shape = {}'.format(z.shape))
+            print('batch_x.shape = {}'.format(batch_x.shape))
+            for i in range(z.shape[0]):
+                _index = patch_name_start_index + i + 1
+                pkl.dump(
+                    obj=batch_x[i, :, :, :, 0],
+                    file=open(os.path.join(save_path, '{}_x.pkl'.format(_index)), 'wb')
+                )
+                pkl.dump(
+                    obj=batch_y[i, :, :, :, 0],
+                    file=open(os.path.join(save_path, '{}_y.pkl'.format(_index)), 'wb')
+                )
+                pkl.dump(
+                    obj=z[i, :, :, :, 0],
+                    file=open(os.path.join(save_path, '{}_z.pkl'.format(_index)), 'wb')
+                )
+                # todo: return loss2
+        return loss, loss1, loss2
 
     def save(self, sess, save_folder: str):
         self._unet.save(sess, os.path.join(save_folder, 'UNet.ckpt'))
