@@ -5,7 +5,7 @@
 # @File    : test_for_UNet.py
 
 import tensorflow as tf
-from FCN_registration_3D.models.utils import conv3d, conv3d_transpose, reg
+from UNet_registration_3D.models.utils import conv3d, conv3d_transpose
 
 
 class UNet(object):
