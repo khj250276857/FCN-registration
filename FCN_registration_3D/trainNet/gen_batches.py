@@ -1,7 +1,15 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Time    : 2018/7/6 21:06
+# @Author  : Hongjian Kang
+# @File    : gen_batches.py
+
+
 import os
 import numpy as np
 from PIL import Image
 import tensorflow as tf
+import pickle as pkl
 
 def gen_batches(x_dir: str, y_dir: str, config: dict):
     """
@@ -28,12 +36,17 @@ def gen_batches(x_dir: str, y_dir: str, config: dict):
     batch_x, batch_y = tf.train.batch(input_queue, batch_size=config["batch_size"])
 
     # 定义处理tensor的外部python函数
-    # def _f(input_tensor, batch_size: int, img_height: int, img_width: int, channels: int):
-    #     _ = np.stack([np.array(Image.open(img_name)) for img_name in input_tensor], axis=0) / 255
-    #     return _.astype(np.float32).reshape([batch_size, img_height, img_width, channels])
-    def _f(input_tensor, batch_size: int, img_height: int, img_width: int, channels: int):
-        _ = np.stack([normalize(np.array(Image.open(img_name))) for img_name in input_tensor], axis=0)
-        return _.astype(np.float32).reshape([batch_size, img_height, img_width, channels])
+    # def _f(input_tensor, batch_size: int, img_height: int, img_width: int, img_depth: int, channels: int):
+    #     _ = np.stack([normalize(np.array(Image.open(img_name))) for img_name in input_tensor], axis=0)
+    #     return _.astype(np.float32).reshape([batch_size, img_height, img_width, img_depth, channels])
+    def _f(input_tensor, batch_size: int, img_height: int, img_width: int, img_depth: int, channels: int):
+        _ = np.zeros([1, img_height, img_width, img_depth, channels])
+        for file_name in input_tensor:
+            with open(file_name, 'rb') as f:
+                volume_array = pkl.load(f)
+            _ = np.vstack((_, volume_array))
+        return _[1:].astype(np.float32).reshape([batch_size, img_height, img_width, img_depth, channels])
+
 
     # 应用外部python函数处理tensor
     batch_x = tf.py_func(_f, [batch_x, config["batch_size"], *config["image_size"], 1], tf.float32)

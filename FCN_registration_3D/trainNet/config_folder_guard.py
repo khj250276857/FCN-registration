@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Time    : 2018/7/6 21:05
+# @Author  : Hongjian Kang
+# @File    : config_folder_guard.py
+
 import os
 
 def config_folder_guard(config: dict):
