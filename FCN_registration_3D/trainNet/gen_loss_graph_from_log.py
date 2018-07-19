@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 
 def gen_loss_graph_from_log():
-    workspace = r"F:\log"
+    workspace = r"C:\Users\khj\Desktop\running data(fcn, learning_rate=0.001,weight=100000,10000,10000)\log"
     train_log = os.path.join(workspace, "train.log")
     valid_log = os.path.join(workspace, "valid.log")
 

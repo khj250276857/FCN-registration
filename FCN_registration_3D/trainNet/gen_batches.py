@@ -51,6 +51,7 @@ def gen_batches(x_dir: str, y_dir: str, config: dict):
     # 应用外部python函数处理tensor
     batch_x = tf.py_func(_f, [batch_x, config["batch_size"], *config["image_size"], 1], tf.float32)
     batch_y = tf.py_func(_f, [batch_y, config["batch_size"], *config["image_size"], 1], tf.float32)
+    print(type(batch_x))
 
     # 返回batch
     return batch_x, batch_y
