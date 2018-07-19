@@ -28,15 +28,15 @@ def train():
     })
 
     #定义训练集和验证集
-    train_x_dir = r'E:\training data\3D volume\pt_volume'
-    train_y_dir = r'E:\training data\3D volume\ct_volume'
+    train_x_dir = r'E:\training data\3D volume(64+64)\pt_volume'
+    train_y_dir = r'E:\training data\3D volume(64+64)\ct_volume'
     batch_x, batch_y = gen_batches(train_x_dir, train_y_dir, {
         'batch_size': config['batch_size'],
         'image_size': config['image_size'],
         'shuffle_batch': config['shuffle_batch']
     })
-    valid_x_dir = r'E:\training data\3D volume\pt_volume_valid'
-    valid_y_dir = r'E:\training data\3D volume\ct_volume_valid'
+    valid_x_dir = r'E:\training data\3D volume(64+64)\pt_volume_valid'
+    valid_y_dir = r'E:\training data\3D volume(64+64)\ct_volume_valid'
     valid_x, valid_y = gen_batches(valid_x_dir, valid_y_dir, {
         'batch_size': config['batch_size'],
         'image_size': config['image_size'],
@@ -44,8 +44,8 @@ def train():
     })
     # config['train_iter_num'] = len(os.listdir(train_x_dir)) // config["batch_size"]
     # config['valid_iter_num'] = len(os.listdir(valid_x_dir)) // config['batch_size']
-    config['train_iter_num'] = 200
-    config['valid_iter_num'] = 20
+    config['train_iter_num'] = 1000
+    config['valid_iter_num'] = 150
 
     #定义日志记录器
     train_log = logger(config['log_dir'], 'train.log')

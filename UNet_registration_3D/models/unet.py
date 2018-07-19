@@ -73,7 +73,7 @@ class unetRegressor(object):
         # calculate loss
         self.loss1 = -ncc_3d(self.y, self.z)
         self.loss2 = grad_3d(self.v)
-        self.loss = self.loss1 + self.loss2 / 1000000
+        self.loss = self.loss1 + self.loss2 / 50000000
 
         # construct trainNet step
         if _is_train:
