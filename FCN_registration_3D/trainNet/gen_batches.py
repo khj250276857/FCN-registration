@@ -45,7 +45,7 @@ def gen_batches(x_dir: str, y_dir: str, config: dict):
             with open(file_name, 'rb') as f:
                 volume_array = pkl.load(f)
             _ = np.vstack((_, volume_array))
-        return _[1:].astype(np.float32).reshape([batch_size, img_height, img_width, img_depth, channels])
+        return normalize(_[1:].astype(np.float32).reshape([batch_size, img_height, img_width, img_depth, channels]))
 
 
     # 应用外部python函数处理tensor
@@ -58,6 +58,6 @@ def gen_batches(x_dir: str, y_dir: str, config: dict):
 
 
 def normalize(input_array):
-    norm_array = (input_array - np.mean(input_array)) / np.std(input_array)
-    output_array = (norm_array - np.min(norm_array)) / (np.max(norm_array) - np.min(norm_array))
+    # norm_array = (input_array - np.mean(input_array)) / np.std(input_array)
+    output_array = (input_array - np.min(input_array)) / (np.max(input_array) - np.min(input_array))
     return output_array
