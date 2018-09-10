@@ -18,9 +18,9 @@ def train():
         # train_parameters
         'image_size': [64, 64, 64],
         'batch_size': 2,    # todo: change batch_size in fcn
-        'learning_rate': 1e-2,
+        'learning_rate': 1e-3,
         'epoch_num': 500,
-        'save_interval': 10,
+        'save_interval': 5,
         'shuffle_batch': True,
         # trainNet data folder
         'checkpoint_dir': r'E:\training data\running data\checkpoints',
@@ -29,15 +29,16 @@ def train():
     })
 
     #定义训练集和验证集
-    train_x_dir = r'E:\training data\3D volume(64+64)\pt_volume'
-    train_y_dir = r'E:\training data\3D volume(64+64)\ct_volume'
+    train_x_dir = r'E:\training data\3D volume suv0-5(64+64)\pt_volume'
+    train_y_dir = r'E:\training data\3D volume suv0-5(64+64)\ct_volume'
+
     batch_x, batch_y = gen_batches(train_x_dir, train_y_dir, {
         'batch_size': config['batch_size'],
         'image_size': config['image_size'],
         'shuffle_batch': config['shuffle_batch']
     })
-    valid_x_dir = r'E:\training data\3D volume(64+64)\pt_volume_valid'
-    valid_y_dir = r'E:\training data\3D volume(64+64)\ct_volume_valid'
+    valid_x_dir = r'E:\training data\3D volume suv0-5(64+64)\pt_volume_valid'
+    valid_y_dir = r'E:\training data\3D volume suv0-5(64+64)\ct_volume_valid'
     valid_x, valid_y = gen_batches(valid_x_dir, valid_y_dir, {
         'batch_size': config['batch_size'],
         'image_size': config['image_size'],
