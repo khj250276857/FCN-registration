@@ -4,6 +4,8 @@
 # @Author  : Hongjian Kang
 # @File    : ResNet.py
 
+# ResNet-18 architecture
+
 import tensorflow as tf
 from ResNet_registration_3D.model.utils import conv3d, res_block_3D_with_ds, res_block_3D_without_ds, reg3d
 from ResNet_registration_3D.model.spatial_transformer_3d import SpatialTransformer3D
