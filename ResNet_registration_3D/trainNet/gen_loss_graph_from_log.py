@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 
 def gen_loss_graph_from_log():
-    workspace = r"C:\Users\khj\Desktop\running data(resnet,learning_rate=0.001,weight=10000,batch_size=2)\log"
+    workspace = r"C:\Users\khj\Desktop\running data(fcn, learning_rate=0.001,weight=100000,10000,10000)"
     train_log = os.path.join(workspace, "train.log")
     valid_log = os.path.join(workspace, "valid.log")
 
@@ -38,7 +38,7 @@ def gen_loss_graph_from_log():
     # plt.plot(valid_x_list, valid_y_list3, c="green", label="valid_loss3")
 
     plt.xlabel("epoch")
-    plt.ylabel("loss(-NCC)")
+    plt.ylabel("loss(-NCC + grad)")
     # plt.axis([0, 30, -1.8, -1.0])
     plt.legend(bbox_to_anchor=[1, 1])
     plt.show()
