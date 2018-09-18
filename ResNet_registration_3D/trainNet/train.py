@@ -17,8 +17,8 @@ def train():
     config = config_folder_guard({
         # train_parameters
         'image_size': [64, 64, 64],
-        'batch_size': 2,    # todo: change batch_size in fcn
-        'learning_rate': 1e-3,
+        'batch_size': 4,    # todo: change batch_size in fcn
+        'learning_rate': 1e-2,
         'epoch_num': 500,
         'save_interval': 5,
         'shuffle_batch': True,
@@ -46,8 +46,8 @@ def train():
     })
     # config['train_iter_num'] = len(os.listdir(train_x_dir)) // config["batch_size"]
     # config['valid_iter_num'] = len(os.listdir(valid_x_dir)) // config['batch_size']
-    config['train_iter_num'] = 1000
-    config['valid_iter_num'] = 150
+    config['train_iter_num'] = 700
+    config['valid_iter_num'] = 100
 
     #定义日志记录器
     train_log = logger(config['log_dir'], 'train.log')

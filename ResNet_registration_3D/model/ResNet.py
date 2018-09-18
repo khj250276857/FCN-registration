@@ -22,9 +22,9 @@ class ResNet(object):
     def __call__(self, x):
         # tf.reset_default_graph()
         with tf.variable_scope(self._name, reuse=self._reuse):
-            batch_size = 2  # todo:change it
+            batch_size = 4  # todo:change it
 
-            x_1 = conv3d(x, 'Conv1', 32, 5, 1, 'SAME', True, tf.nn.relu, self._is_train)
+            x_1 = conv3d(x, 'Conv1', 32, 3, 1, 'SAME', True, tf.nn.relu, self._is_train)
             x_2 = tf.nn.max_pool3d(x_1, [1, 3, 3, 3, 1], [1, 2, 2, 2, 1], 'SAME', name='pooling1')      # size=10*32*32*32
             res_1 = res_block_3D_without_ds(x_2, 'ResBlock_1', 32, 3, 1, 'SAME', True, tf.nn.relu, self._is_train)
             res_2 = res_block_3D_without_ds(res_1, 'ResBlock_2', 32, 3, 1, 'SAME', True, tf.nn.relu, self._is_train)
