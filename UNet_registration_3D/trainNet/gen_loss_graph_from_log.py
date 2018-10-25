@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 
 def gen_loss_graph_from_log():
-    workspace = r"C:\Users\khj\Desktop\running data\log"
+    workspace = r"C:\Users\khj\Desktop\实验结果（原始）\DN(batch_size=8,weight=200000,learning_rate=0.01,epoch=500)\log"
     train_log = os.path.join(workspace, "train.log")
     valid_log = os.path.join(workspace, "valid.log")
 
@@ -21,8 +21,8 @@ def gen_loss_graph_from_log():
 
     train_y_text = [_.strip() for _ in train_y_text.split("\n") if _ != ""]
     valid_y_text = [_.strip() for _ in valid_y_text.split("\n") if _ != ""]
-    train_y_list = [float(_.split(',')[1].split('=')[-1].split('...')[0])/10 for _ in train_y_text]
-    valid_y_list = [float(_.split(',')[1].split('=')[-1].split('...')[0])/10 for _ in valid_y_text]
+    train_y_list = [float(_.split(',')[2].split('=')[-1]) for _ in train_y_text]
+    valid_y_list = [float(_.split(',')[2].split('=')[-1]) for _ in valid_y_text]
 
     # train_x_list = np.array(range(len(train_y_list))) * 400
     # valid_x_list = np.array(range(len(valid_y_list))) * 400
@@ -33,7 +33,7 @@ def gen_loss_graph_from_log():
     plt.plot(valid_x_list, valid_y_list, c="red", label="valid_loss")
 
     plt.xlabel("epoch")
-    plt.ylabel("loss(-NCC)+Grad")
+    plt.ylabel("loss(-NCC)")
     # plt.axis([0, 30, -1.8, -1.0])
     plt.legend(bbox_to_anchor=[1, 1])
     plt.show()
