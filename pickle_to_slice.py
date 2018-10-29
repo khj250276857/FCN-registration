@@ -17,14 +17,14 @@ def save_2d_from_3d(pickle_path, save_path):  # pickle_path为pickle文件绝对
     with open(pickle_path, 'rb') as f:
         array = pkl.load(f)
     for i in range(array.shape[2]):
-        imsave(os.path.join(os.path.join(save_path, '_{:>02}.png'.format(i+1))), array[:, :, i])
+        imsave(os.path.join(os.path.join(save_path, '{:>02}.png'.format(i+1))), array[:, :, i])
 
 
 
 def main():
-    x_path = r'C:\Users\khj\Desktop\running data(fcn, learning_rate=0.001,weight=100000,10000,10000)\validate\5_x.pkl'
-    y_path = r'C:\Users\khj\Desktop\running data(fcn, learning_rate=0.001,weight=100000,10000,10000)\validate\5_y.pkl'
-    z_path = r'C:\Users\khj\Desktop\running data(fcn, learning_rate=0.001,weight=100000,10000,10000)\validate\5_z1.pkl'
+    x_path = r'C:\Users\khj\Desktop\实验结果（原始）\DenseNet_V1\DN(batch_size=8,weight=500000,learning_rate=0.01)\validate\8_x.pkl'
+    y_path = r'C:\Users\khj\Desktop\实验结果（原始）\DenseNet_V1\DN(batch_size=8,weight=500000,learning_rate=0.01)\validate\8_y.pkl'
+    z_path = r'C:\Users\khj\Desktop\实验结果（原始）\DenseNet_V1\DN(batch_size=8,weight=500000,learning_rate=0.01)\validate\8_z.pkl'
 
     save_path = r'C:\Users\khj\Desktop\slice data'
     x_save_path = os.path.join(save_path, os.path.split(x_path)[-1].split('.')[0])
