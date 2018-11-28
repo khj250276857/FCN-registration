@@ -85,7 +85,7 @@ class fcnRegressor(object):
 
         # construct trainNet step
         if _is_train:
-            _optimizer = tf.train.AdadeltaOptimizer(config['learning_rate'])
+            _optimizer = tf.train.AdamOptimizer(config['learning_rate'])
             _var_list = self._fcn.var_list
             self.train_step = _optimizer.minimize(self.loss, var_list=_var_list)
 
